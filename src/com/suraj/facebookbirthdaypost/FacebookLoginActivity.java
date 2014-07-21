@@ -1,17 +1,18 @@
 package com.suraj.facebookbirthdaypost;
 
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.Session.StatusCallback;
-import com.facebook.model.GraphUser;
-
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import com.facebook.Request;
+import com.facebook.Request.GraphUserCallback;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.model.GraphUser;
 
 public class FacebookLoginActivity extends Activity {
 	
@@ -43,13 +44,20 @@ public class FacebookLoginActivity extends Activity {
 								
 							}
 						}
-					})
+					}).executeAsync();
 					
 				}
 				
 			}
 		});
 	}
+	
+	 @Override
+	  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	      super.onActivityResult(requestCode, resultCode, data);
+	      Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+	  }
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
