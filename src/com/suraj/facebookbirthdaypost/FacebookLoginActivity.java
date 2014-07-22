@@ -3,6 +3,7 @@ package com.suraj.facebookbirthdaypost;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,8 @@ public class FacebookLoginActivity extends Activity {
 	private TextView instructionsOrLink;
 	private Button buttonLoginLogout;
     private Session.StatusCallback statusCallback = new SessionStatusCallback();
+    
+    private static final String TAG = "fb";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +38,19 @@ public class FacebookLoginActivity extends Activity {
 		Session session = Session.getActiveSession();
 		if(session == null)
 		{
+			Log.i(TAG, "STAART: session null");
 			if(savedInstanceState!=null)
 			{
+				Log.i(TAG, "savedIns not null");
 				session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
+				Log.i(TAG, "end savedIns not null");
 			}
 			
 			if(session == null)
 			{
+				Log.i(TAG, "session null");
 				session= new Session(this);
+				Log.i(TAG, "end session null");
 			}
 			
 			Session.setActiveSession(session);
@@ -103,22 +111,29 @@ public class FacebookLoginActivity extends Activity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		// TODO Auto-generated method stub
+		Log.i(TAG, "onsaveins");
 		super.onSaveInstanceState(outState);
 		Session session = Session.getActiveSession();
 		Session.saveSession(session, outState);
+		Log.i(TAG, "end onsaveins");
+		
 	}
 	
 	private void updateView()
 	{
+		Log.i(TAG, "view update");
 		Session session = Session.getActiveSession();
 		if(session.isOpened())
 		{
+			Log.i(TAG, "session open");
 			instructionsOrLink.setText(URL_PREFIX_FRIENDS+session.getAccessToken());
 			buttonLoginLogout.setText(R.string.logout);
 			buttonLoginLogout.setOnClickListener(new OnClickListener() {
 				
 				@Override
 				public void onClick(View v) {
+
+					Log.i(TAG, "clicked logout");
 					onClickLogOut();
 				}
 			});
@@ -127,15 +142,20 @@ public class FacebookLoginActivity extends Activity {
 		
 		else
 		{
+			Log.i(TAG, "session closed");
+			
 			instructionsOrLink.setText(R.string.instructions);
 			buttonLoginLogout.setText(R.string.login);
 			buttonLoginLogout.setOnClickListener(new OnClickListener() {
 				
 				@Override
 				public void onClick(View v) {
+					Log.i(TAG, "clicked login");
+					
 					onClicklogin();
 				}
 			});
+			Log.i(TAG, "end session closed");
 			
 		}
 	}
@@ -158,12 +178,14 @@ public class FacebookLoginActivity extends Activity {
 	
 	private void onClickLogOut()
 	{
+		Log.i(TAG, "logout");
 		Session session = Session.getActiveSession();
 		if(!session.isClosed())
 		{
 			session.closeAndClearTokenInformation();
 			
 		}
+		Log.i(TAG, "end logout");
 	}
 	
    private class SessionStatusCallback implements Session.StatusCallback {
