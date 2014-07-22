@@ -53,6 +53,8 @@ public class FacebookLoginActivity extends Activity {
 			
 		}
 		
+		updateView();
+		
 		
 		
 	}
