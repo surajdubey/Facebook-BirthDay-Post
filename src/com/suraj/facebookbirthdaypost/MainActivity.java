@@ -1,34 +1,34 @@
 package com.suraj.facebookbirthdaypost;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-public class MainActivity extends Activity {
-
+public class MainActivity extends FragmentActivity {
+	private Button buttonLoginActivity;
 	Button login;
 	final Context context = this;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
 		
-		login = (Button) findViewById(R.id.login);
-		login.setOnClickListener(new OnClickListener() {
+		setContentView(R.layout.activity_main);
+		buttonLoginActivity = (Button) findViewById(R.id.login);
+		buttonLoginActivity.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(context , FacebookLoginActivity.class);
+				Intent intent = new Intent(MainActivity.this , FacebookLoginActivity.class);
 				startActivity(intent);
 			}
 		});
-		
 	}
 	
 

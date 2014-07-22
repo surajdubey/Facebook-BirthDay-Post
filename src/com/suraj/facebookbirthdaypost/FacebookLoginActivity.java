@@ -5,51 +5,56 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 
-import com.facebook.Request;
-import com.facebook.Request.GraphUserCallback;
-import com.facebook.Response;
+import com.facebook.LoggingBehavior;
 import com.facebook.Session;
+
 import com.facebook.SessionState;
-import com.facebook.model.GraphUser;
+import com.facebook.Settings;
 
 public class FacebookLoginActivity extends Activity {
 	
-	TextView welcome;
-
+	private static final String URL_PREFIX_FRIENDS = "https://graph.facebook.com/me/friends?access_token=";
+	private TextView instructionsOrLink;
+	private Button buttonLoginLogout;
+    private Session.StatusCallback statusCallback = new SessionStatusCallback();
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_facebook_login);
 		
-		welcome = (TextView) findViewById(R.id.welcome);
+		instructionsOrLink = (TextView) findViewById(R.id.instructionsOrLink);
+		buttonLoginLogout = (Button) findViewById(R.id.buttonLoginLogout);
+		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 		
-		Session.openActiveSession(this, true, new Session.StatusCallback() {
-			
-			@Override
-			public void call(Session session, SessionState state, Exception exception) {
-				// TODO Auto-generated method stub
-				
-				if(session.isOpened())
-				{
-					// make request to the /me API
-					Request.newMeRequest(session, new GraphUserCallback() {
-						
-						@Override
-						public void onCompleted(GraphUser user, Response response) {
-							if(user!=null)
-							{
-								welcome.setText("Hello " + user.getName()+"!");
-								
-							}
-						}
-					}).executeAsync();
-					
-				}
-				
+		Session session = Session.getActiveSession();
+		if(session == null)
+		{
+			if(savedInstanceState!=null)
+			{
+				session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
 			}
-		});
+			
+			if(session == null)
+			{
+				session= new Session(this);
+			}
+			
+			Session.setActiveSession(session);
+			if(session.getState().equals(SessionState.CREATED_TOKEN_LOADED))
+			{
+				session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
+			}
+			
+		}
+		
+		
+		
 	}
 	
 	 @Override
@@ -78,6 +83,94 @@ public class FacebookLoginActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+		Session.getActiveSession().addCallback(statusCallback);
+	}
+	
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		Session.getActiveSession().removeCallback(statusCallback);
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		super.onSaveInstanceState(outState);
+		Session session = Session.getActiveSession();
+		Session.saveSession(session, outState);
+	}
+	
+	private void updateView()
+	{
+		Session session = Session.getActiveSession();
+		if(session.isOpened())
+		{
+			instructionsOrLink.setText(URL_PREFIX_FRIENDS+session.getAccessToken());
+			buttonLoginLogout.setText(R.string.logout);
+			buttonLoginLogout.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					onClickLogOut();
+				}
+			});
+			
+		}
+		
+		else
+		{
+			instructionsOrLink.setText(R.string.instructions);
+			buttonLoginLogout.setText(R.string.login);
+			buttonLoginLogout.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					onClicklogin();
+				}
+			});
+			
+		}
+	}
+	
+	private void onClicklogin()
+	{
+		Session session = Session.getActiveSession();
+		if(!session.isOpened() && !session.isClosed())
+		{
+			session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
+			
+		}
+		else
+		{
+			Session.openActiveSession(this, true, statusCallback);
+			
+		}
+		
+	}
+	
+	private void onClickLogOut()
+	{
+		Session session = Session.getActiveSession();
+		if(!session.isClosed())
+		{
+			session.closeAndClearTokenInformation();
+			
+		}
+	}
+	
+   private class SessionStatusCallback implements Session.StatusCallback {
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+            updateView();
+        }
+    }
+
 
 
 }

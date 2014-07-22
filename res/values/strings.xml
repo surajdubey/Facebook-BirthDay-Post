@@ -7,5 +7,8 @@
     <string name="login_fb">Login With Facebook</string>
     <string name="app_id">860610873968044</string>
     <string name="title_activity_facebook_login">FacebookLoginActivity</string>
+    <string name="login">Login</string>
+    <string name="instructions">Login to create a link to fetch account data</string>
+    <string name="logout">Log out</string>
 
 </resources>
